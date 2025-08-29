@@ -1,64 +1,160 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Municipal Infraction Management API
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+[![Laravel](https://img.shields.io/badge/Laravel-9.x-red.svg)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.0+-blue.svg)](https://php.net)
+[![MySQL](https://img.shields.io/badge/MySQL-5.7+-green.svg)](https://mysql.com)
+[![License](https://img.shields.io/badge/License-Proprietary-orange.svg)](LICENSE)
 
-## About Laravel
+A comprehensive REST API for municipal infraction management built with Laravel. Developed for GM-SOFT to provide efficient data management for local government operations.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🏛️ About
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+**Municipal Infraction Management API** is a robust backend system designed for local governments to efficiently track, manage, and process municipal violations. The system provides complete CRUD operations, geolocation tracking, and data validation for all municipal entities.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## ✨ Features
 
-## Learning Laravel
+-   🔐 **Authentication System** - Laravel Sanctum for secure API access
+-   📍 **Geolocation Services** - Latitude/longitude tracking for infractions and communes
+-   📊 **Data Management** - Complete CRUD operations for 7 core entities
+-   🔍 **Advanced Validation** - Comprehensive input validation with custom rules
+-   🗄️ **Database Integrity** - Foreign key relationships with cascade delete protection
+-   📱 **RESTful API** - Standard HTTP methods with JSON responses
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🛠️ Tech Stack
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+-   **Backend Framework**: Laravel 9.x
+-   **Programming Language**: PHP 8.0+
+-   **Database**: MySQL 5.7+ / PostgreSQL 10+
+-   **Authentication**: Laravel Sanctum
+-   **API**: RESTful endpoints
 
-## Laravel Sponsors
+## 📊 Data Entities
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+-   **Infractions** - Main violation records with geolocation coordinates
+-   **Agents** - Law enforcement personnel with unique identification
+-   **Violators** - Individuals who committed violations
+-   **Communes** - Municipal areas with administrative boundaries
+-   **Categories** - Infraction classification system with severity degrees
+-   **Decisions** - Outcomes and rulings for infractions
+-   **Users** - System user management and authentication
 
-### Premium Partners
+## 📋 API Endpoints
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+| Method   | Endpoint               | Description             |
+| -------- | ---------------------- | ----------------------- |
+| `GET`    | `/api/infraction`      | List all infractions    |
+| `POST`   | `/api/infraction`      | Create new infraction   |
+| `GET`    | `/api/infraction/{id}` | Get specific infraction |
+| `PUT`    | `/api/infraction/{id}` | Update infraction       |
+| `DELETE` | `/api/infraction/{id}` | Delete infraction       |
 
-## Contributing
+Similar endpoints available for: `/api/agent`, `/api/commune`, `/api/categorie`, `/api/violant`, `/api/decision`, `/api/user`
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🚀 Quick Start
 
-## Code of Conduct
+### 1. Clone and Install
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+git clone https://github.com/yhafiane7/gm-soft-municipal-infraction-api.git
+cd gm-soft-municipal-infraction-api
+composer install
+```
 
-## Security Vulnerabilities
+### 2. Environment Setup
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+cp .env.example .env
+php artisan key:generate
+# Configure your database credentials in .env
+php artisan migrate
+```
 
-## License
+### 3. Start Server
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan serve
+```
+
+Visit `http://localhost:8000/api/test` to test the API.
+
+## 📝 Usage Examples
+
+### Creating an Infraction
+
+```bash
+curl -X POST http://localhost:8000/api/infraction \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nom": "Traffic Violation",
+    "date": "2024-01-15",
+    "adresse": "123 Main Street",
+    "commune_id": 1,
+    "violant_id": 1,
+    "agent_id": 1,
+    "categorie_id": 1,
+    "latitude": 34.0522,
+    "longitude": -118.2437
+  }'
+```
+
+### Creating an Agent
+
+```bash
+curl -X POST http://localhost:8000/api/agent \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nom": "Smith",
+    "prenom": "John",
+    "tel": "1234567890",
+    "cin": "AB123456789"
+  }'
+```
+
+## 🔒 Data Validation
+
+### Key Validation Rules
+
+-   **Infractions**: Required fields include name, date, address, coordinates, and all foreign key references
+-   **Agents**: Required name, phone (unique), and national ID (unique)
+-   **Communes**: Required administrative data and coordinates
+-   **All entities**: Foreign key existence validation and data type checking
+
+## 🏢 Project Context
+
+This API was developed for **GM-SOFT** to provide municipal governments with a comprehensive solution for managing infractions and violations. The system enables efficient tracking, geolocation-based management, and data-driven decision making for local governments.
+
+## 🧪 Testing
+
+```bash
+php artisan test
+```
+
+## 🚀 Deployment
+
+### Production Build
+
+```bash
+composer install --optimize-autoloader --no-dev
+php artisan config:cache
+php artisan route:cache
+```
+
+### Server Requirements
+
+-   PHP 8.0+
+-   MySQL 5.7+ or PostgreSQL 10+
+-   Composer
+-   Web server (Apache/Nginx)
+
+## 📄 License
+
+This project is proprietary software developed for GM-SOFT. All rights reserved.
+
+## 🙏 Acknowledgments
+
+-   Laravel team for the amazing framework
+-   GM-SOFT for the project opportunity
+
+---
+
+**Built with ❤️ for efficient municipal data management**
