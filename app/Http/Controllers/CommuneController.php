@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Validator;
 
 class CommuneController extends Controller
 {
-  
     /**
      * Display a listing of the resource.
      *
@@ -17,9 +16,8 @@ class CommuneController extends Controller
      */
     public function index()
     {
-        //
-        $AllCommune = Commune::all();
-        return response()->json($AllCommune);
+        $communes = Commune::all();
+        return response()->json($communes);
     }
 
     /**
@@ -38,28 +36,39 @@ class CommuneController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-        public function store(Request $request)
-        {
-            //
-            $validator = Validator::make($request->all(),[
-            'pachalik-circon'=>'required|max:200',
-            'caidat'=>'required|max:200',
-            'nom'=>'required|max:50',
-            'latitude'=>'required',
-            'longitude'=>'required',
-            ]
-            );
-            if ($validator->fails()) {
-                return response()->json(['errors' => $validator->errors()], 400);
-            }
-            Commune::create([
-                'pachalik-circon'=>$request->input('pachalik-circon'),
-                'caidat'=>$request->caidat,
-                'nom'=>$request->nom,
-                'latitude'=>floatval($request->latitude),
-                'longitude'=>floatval($request->longitude),
-            ]);
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'pachalik-circon' => 'required|string|max:200|min:2',
+            'caidat' => 'required|string|max:200|min:2',
+            'nom' => 'required|string|max:50|min:2',
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+        ], [
+            'pachalik-circon.min' => 'The pachalik-circon must be at least 2 characters.',
+            'caidat.min' => 'The caidat must be at least 2 characters.',
+            'nom.min' => 'The commune name must be at least 2 characters.',
+            'latitude.between' => 'Latitude must be between -90 and 90 degrees.',
+            'longitude.between' => 'Longitude must be between -180 and 180 degrees.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
         }
+
+        $commune = Commune::create([
+            'pachalik-circon' => trim($request->input('pachalik-circon')),
+            'caidat' => trim($request->caidat),
+            'nom' => trim($request->nom),
+            'latitude' => floatval($request->latitude),
+            'longitude' => floatval($request->longitude),
+        ]);
+
+        return response()->json([
+            'message' => 'Commune created successfully',
+            'data' => $commune
+        ], 201);
+    }
 
     /**
      * Display the specified resource.
@@ -69,14 +78,13 @@ class CommuneController extends Controller
      */
     public function show($id)
     {
-        //
-        $Commune = Commune::find($id);
+        $commune = Commune::find($id);
 
-        if (!$Commune) {
-            return response()->json(['Error' => 'Commune Introuvable']);
+        if (!$commune) {
+            return response()->json(['error' => 'Commune not found'], 404);
         }
 
-        return response()->json($Commune);
+        return response()->json($commune);
     }
 
     /**
@@ -99,16 +107,18 @@ class CommuneController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
-        $Commune = Commune::find($id);
+        $commune = Commune::find($id);
 
-        if (!$Commune) {
-            return response()->json(['Error' => 'Commune Introuvable']);
-        }else{
-            $Commune->update($request->all());
+        if (!$commune) {
+            return response()->json(['error' => 'Commune not found'], 404);
         }
 
-        return response()->json($Commune);
+        $commune->update($request->all());
+
+        return response()->json([
+            'message' => 'Commune updated successfully',
+            'data' => $commune
+        ]);
     }
 
     /**
@@ -118,24 +128,23 @@ class CommuneController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
-{
-   
-    $infraction = Infraction::firstWhere("commune_id", $id);
-    $commune = Commune::find($id);
+    {
+        $infraction = Infraction::firstWhere("commune_id", $id);
+        $commune = Commune::find($id);
 
-    if (!$commune) {
-        // si Commune introuvable retourner un message
-        return response()->json(['Message' => 'Commune introuvable']);
-    }
+        if (!$commune) {
+            return response()->json(['error' => 'Commune not found'], 404);
+        }
 
-    if ($infraction) {
-         // si Commune se trouve dans une infraction retourner un message
-        $infractionId = $infraction->id;
-        return response()->json(['Message' => "La Commune se trouve dans l'infraction: ".$infractionId]);
-    } else {
-        // si nous l'avons trouver on le supprime et retourner un message
+        if ($infraction) {
+            return response()->json([
+                'error' => 'Cannot delete commune',
+                'message' => "Commune is referenced in infraction: " . $infraction->id
+            ], 409);
+        }
+
         $commune->delete();
-        return response()->json(['Message' => 'Commune supprimée']);
+
+        return response()->json(['message' => 'Commune deleted successfully']);
     }
-}
 }

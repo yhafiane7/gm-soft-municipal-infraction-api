@@ -16,9 +16,8 @@ class InfractionController extends Controller
      */
     public function index()
     {
-        //
-        $AllInfraction = Infraction::all();
-        return $AllInfraction;
+        $infractions = Infraction::all();
+        return response()->json($infractions);
     }
 
     /**
@@ -39,28 +38,38 @@ class InfractionController extends Controller
      */
     public function store(Request $request)
     {
-        //
         $validator = Validator::make(
             $request->all(),
             [
-                'nom' => 'required|max:50',
-                'date' => 'required|date',
-                'adresse' => 'required|max:255',
+                'nom' => 'required|string|max:100|min:2',
+                'date' => 'required|date|before_or_equal:today',
+                'adresse' => 'required|string|max:255|min:5',
                 'commune_id' => 'required|integer|exists:commune,id',
                 'violant_id' => 'required|integer|exists:violant,id',
                 'agent_id' => 'required|integer|exists:agent,id',
                 'categorie_id' => 'required|integer|exists:categorie,id',
-                'latitude' => 'required',
-                'longitude' => 'required',
+                'latitude' => 'required|numeric|between:-90,90',
+                'longitude' => 'required|numeric|between:-180,180',
+            ],
+            [
+                'nom.required' => 'The infraction name is required.',
+                'nom.min' => 'The infraction name must be at least 2 characters.',
+                'nom.max' => 'The infraction name cannot exceed 100 characters.',
+                'date.before_or_equal' => 'The infraction date cannot be in the future.',
+                'adresse.min' => 'The address must be at least 5 characters.',
+                'latitude.between' => 'Latitude must be between -90 and 90 degrees.',
+                'longitude.between' => 'Longitude must be between -180 and 180 degrees.',
             ]
         );
+
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
-        Infraction::create([
-            'nom' => $request->nom,
+
+        $infraction = Infraction::create([
+            'nom' => trim($request->nom),
             'date' => $request->date,
-            'adresse' => $request->adresse,
+            'adresse' => trim($request->adresse),
             'commune_id' => $request->commune_id,
             'violant_id' => $request->violant_id,
             'agent_id' => $request->agent_id,
@@ -68,6 +77,11 @@ class InfractionController extends Controller
             'latitude' => floatval($request->latitude),
             'longitude' => floatval($request->longitude),
         ]);
+
+        return response()->json([
+            'message' => 'Infraction created successfully',
+            'data' => $infraction
+        ], 201);
     }
 
     /**
@@ -78,14 +92,13 @@ class InfractionController extends Controller
      */
     public function show($id)
     {
-        //
-        $Infraction = Infraction::find($id);
+        $infraction = Infraction::find($id);
 
-        if (!$Infraction) {
-            return response()->json(['Error' => 'Infraction Introuvable']);
+        if (!$infraction) {
+            return response()->json(['error' => 'Infraction not found'], 404);
         }
 
-        return response()->json($Infraction);
+        return response()->json($infraction);
     }
 
     /**
@@ -108,16 +121,73 @@ class InfractionController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
-        $Infraction = Infraction::find($id);
+        $infraction = Infraction::find($id);
 
-        if (!$Infraction) {
-            return response()->json(['Error' => 'Infraction Introuvable']);
-        }else{
-            $Infraction->update($request->all());
+        if (!$infraction) {
+            return response()->json(['error' => 'Infraction not found'], 404);
         }
 
-        return response()->json($Infraction);
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'nom' => 'sometimes|required|string|max:100|min:2',
+                'date' => 'sometimes|required|date|before_or_equal:today',
+                'adresse' => 'sometimes|required|string|max:255|min:5',
+                'commune_id' => 'sometimes|required|integer|exists:commune,id',
+                'violant_id' => 'sometimes|required|integer|exists:violant,id',
+                'agent_id' => 'sometimes|required|integer|exists:agent,id',
+                'categorie_id' => 'sometimes|required|integer|exists:categorie,id',
+                'latitude' => 'sometimes|required|numeric|between:-90,90',
+                'longitude' => 'sometimes|required|numeric|between:-180,180',
+            ],
+            [
+                'nom.min' => 'The infraction name must be at least 2 characters.',
+                'nom.max' => 'The infraction name cannot exceed 100 characters.',
+                'date.before_or_equal' => 'The infraction date cannot be in the future.',
+                'adresse.min' => 'The address must be at least 5 characters.',
+                'latitude.between' => 'Latitude must be between -90 and 90 degrees.',
+                'longitude.between' => 'Longitude must be between -180 and 180 degrees.',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        $updateData = $request->only([
+            'nom',
+            'date',
+            'adresse',
+            'commune_id',
+            'violant_id',
+            'agent_id',
+            'categorie_id',
+            'latitude',
+            'longitude'
+        ]);
+
+        // Sanitize string fields
+        if (isset($updateData['nom'])) {
+            $updateData['nom'] = trim($updateData['nom']);
+        }
+        if (isset($updateData['adresse'])) {
+            $updateData['adresse'] = trim($updateData['adresse']);
+        }
+
+        // Convert coordinates to float
+        if (isset($updateData['latitude'])) {
+            $updateData['latitude'] = floatval($updateData['latitude']);
+        }
+        if (isset($updateData['longitude'])) {
+            $updateData['longitude'] = floatval($updateData['longitude']);
+        }
+
+        $infraction->update($updateData);
+
+        return response()->json([
+            'message' => 'Infraction updated successfully',
+            'data' => $infraction
+        ]);
     }
 
     /**
@@ -128,22 +198,22 @@ class InfractionController extends Controller
      */
     public function destroy($id)
     {
-        //
-        $decision= Decision::firstWhere("infraction_id",$id);
-        //rechercher l 'Infraction
-        $Infraction = Infraction::find($id);
-        if (!$Infraction) {
-            // si Infraction introuvable retourner un erreur
-            return response()->json(['Message' => 'Infraction Introuvable']);
+        $decision = Decision::firstWhere("infraction_id", $id);
+        $infraction = Infraction::find($id);
+
+        if (!$infraction) {
+            return response()->json(['error' => 'Infraction not found'], 404);
         }
+
         if ($decision) {
-            // si Infraction se trouve dans une infraction retourner un message
-           $decisionId = $decision->id;
-           return response()->json(['Message' => "La Infraction se trouve dans la décision: ".$decisionId]);
-       } else {
-        // si nous l'avons trouver on le supprime et retourner un message
-        $Infraction->delete();
-        return response()->json(['Message' => 'Infraction Supprimé']);
+            return response()->json([
+                'error' => 'Cannot delete infraction',
+                'message' => "Infraction is referenced in decision: " . $decision->id
+            ], 409);
+        }
+
+        $infraction->delete();
+
+        return response()->json(['message' => 'Infraction deleted successfully']);
     }
-}
 }

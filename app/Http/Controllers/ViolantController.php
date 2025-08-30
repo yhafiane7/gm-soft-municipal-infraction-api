@@ -16,9 +16,8 @@ class ViolantController extends Controller
      */
     public function index()
     {
-        //
-        $AllViolant = Violant::all();
-        return response()->json($AllViolant);
+        $violants = Violant::all();
+        return response()->json($violants);
     }
 
     /**
@@ -39,20 +38,31 @@ class ViolantController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        $validator = Validator::make($request->all(),[
-            'nom' => 'required|max:50',
-            'prenom' => 'required|max:50',
-            'cin' => 'required|max:12|unique:violant,cin'
+        $validator = Validator::make($request->all(), [
+            'nom' => 'required|string|max:50|min:2',
+            'prenom' => 'required|string|max:50|min:2',
+            'cin' => 'required|string|max:12|unique:violant,cin|regex:/^[A-Z0-9]+$/'
+        ], [
+            'nom.min' => 'The last name must be at least 2 characters.',
+            'prenom.min' => 'The first name must be at least 2 characters.',
+            'cin.regex' => 'The CIN must contain only uppercase letters and numbers.',
+            'cin.max' => 'The CIN must be at most 12 characters.',
         ]);
+
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
-        Violant::create([
-            'nom' => $request->nom,
-            'prenom' => $request->prenom,
-            'cin' => $request->cin,
+
+        $violant = Violant::create([
+            'nom' => trim($request->nom),
+            'prenom' => trim($request->prenom),
+            'cin' => strtoupper(trim($request->cin)),
         ]);
+
+        return response()->json([
+            'message' => 'Violant created successfully',
+            'data' => $violant
+        ], 201);
     }
 
     /**
@@ -63,12 +73,13 @@ class ViolantController extends Controller
      */
     public function show($id)
     {
-        //
-        $Violant = Violant::find($id);
-        if (!$Violant) {
-            return response()->json(['Error' => 'Violant Introuvable'], 404);
+        $violant = Violant::find($id);
+
+        if (!$violant) {
+            return response()->json(['error' => 'Violant not found'], 404);
         }
-        return response()->json($Violant);
+
+        return response()->json($violant);
     }
 
     /**
@@ -91,16 +102,18 @@ class ViolantController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
-        $Violant = Violant::find($id);
+        $violant = Violant::find($id);
 
-        if (!$Violant) {
-            return response()->json(['Error' => 'Violant Introuvable']);
-        } else {
-            $Violant->update($request->all());
+        if (!$violant) {
+            return response()->json(['error' => 'Violant not found'], 404);
         }
 
-        return response()->json($Violant);
+        $violant->update($request->all());
+
+        return response()->json([
+            'message' => 'Violant updated successfully',
+            'data' => $violant
+        ]);
     }
 
     /**
@@ -111,24 +124,22 @@ class ViolantController extends Controller
      */
     public function destroy($id)
     {
-
-
         $infraction = Infraction::firstWhere("violant_id", $id);
         $violant = Violant::find($id);
 
         if (!$violant) {
-            // si Violant introuvable retourner un message
-            return response()->json(['Message' => 'Violant introuvable']);
+            return response()->json(['error' => 'Violant not found'], 404);
         }
 
         if ($infraction) {
-            // si Violant se trouve dans une infraction retourner un message
-            $infractionId = $infraction->id;
-            return response()->json(['Message' => "Le violant se trouve dans l'infraction: ".$infractionId]);
-        } else {
-            // si nous l'avons trouver on le supprime et retourner un message
-            $violant->delete();
-            return response()->json(['Message' => 'Violant supprimée']);
+            return response()->json([
+                'error' => 'Cannot delete violant',
+                'message' => "Violant is referenced in infraction: " . $infraction->id
+            ], 409);
         }
+
+        $violant->delete();
+
+        return response()->json(['message' => 'Violant deleted successfully']);
     }
 }

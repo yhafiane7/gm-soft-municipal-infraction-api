@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -14,9 +16,8 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
-        $AllUsers = User::all();
-        return $AllUsers;
+        $users = User::all();
+        return response()->json($users);
     }
 
     /**
@@ -37,7 +38,26 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        return response()->json([
+            'message' => 'User created successfully',
+            'data' => $user
+        ], 201);
     }
 
     /**
@@ -48,14 +68,13 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        //
-        $User = User::find($id);
+        $user = User::find($id);
 
-        if (!$User) {
-            return response()->json(['Error' => 'User Introuvable']);
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
         }
 
-        return response()->json($User);
+        return response()->json($user);
     }
 
     /**
@@ -78,7 +97,34 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $id,
+            'password' => 'sometimes|required|string|min:8',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        $updateData = $request->only(['name', 'email']);
+
+        if ($request->has('password')) {
+            $updateData['password'] = Hash::make($request->password);
+        }
+
+        $user->update($updateData);
+
+        return response()->json([
+            'message' => 'User updated successfully',
+            'data' => $user
+        ]);
     }
 
     /**
@@ -89,15 +135,14 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
-        //rechercher l 'User
-        $User = User::find($id);
-        if (!$User) {
-            // si User introuvable retourner un erreur
-            return response()->json(['Erreur' => 'User Introuvable']);
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
         }
-        // si nous l'avons trouver on le supprime et retourner un message
-        $User->delete();
-        return response()->json(['message' => 'User Supprimé']);
+
+        $user->delete();
+
+        return response()->json(['message' => 'User deleted successfully']);
     }
 }

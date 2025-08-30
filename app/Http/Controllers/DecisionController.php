@@ -15,9 +15,8 @@ class DecisionController extends Controller
      */
     public function index()
     {
-        //
-        $AllDecision = Decision::all();
-        return $AllDecision;
+        $decisions = Decision::all();
+        return response()->json($decisions);
     }
 
     /**
@@ -39,20 +38,28 @@ class DecisionController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'date' => 'required|date',
-            'decisionprise' => 'required|max:200',
-            'infraction_id' => 'required|exists:infraction,id',
+            'date' => 'required|date|before_or_equal:today',
+            'decisionprise' => 'required|string|max:200|min:5',
+            'infraction_id' => 'required|integer|exists:infraction,id',
+        ], [
+            'date.before_or_equal' => 'The decision date cannot be in the future.',
+            'decisionprise.min' => 'The decision must be at least 5 characters.',
         ]);
-    
+
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
-    
-        Decision::create([
+
+        $decision = Decision::create([
             'date' => $request->date,
-            'decisionprise' => $request->decisionprise,
+            'decisionprise' => trim($request->decisionprise),
             'infraction_id' => $request->infraction_id,
         ]);
+
+        return response()->json([
+            'message' => 'Decision created successfully',
+            'data' => $decision
+        ], 201);
     }
 
     /**
@@ -63,14 +70,13 @@ class DecisionController extends Controller
      */
     public function show($id)
     {
-        //
-        $Decision = Decision::find($id);
+        $decision = Decision::find($id);
 
-        if (!$Decision) {
-            return response()->json(['Error' => 'Décision Introuvable']);
+        if (!$decision) {
+            return response()->json(['error' => 'Decision not found'], 404);
         }
 
-        return response()->json($Decision);
+        return response()->json($decision);
     }
 
     /**
@@ -93,17 +99,18 @@ class DecisionController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $Decision = Decision::find($id);
+        $decision = Decision::find($id);
 
-        if (!$Decision) {
-            return response()->json(['Error' => 'Agent Introuvable']);
-        }else{
-            $time=strtotime($request->date);
-            $time=date('Y-m-d',$time);
-            $Decision->update($request->all());
+        if (!$decision) {
+            return response()->json(['error' => 'Decision not found'], 404);
         }
 
-        return response()->json($Decision);
+        $decision->update($request->all());
+
+        return response()->json([
+            'message' => 'Decision updated successfully',
+            'data' => $decision
+        ]);
     }
 
     /**
@@ -114,15 +121,14 @@ class DecisionController extends Controller
      */
     public function destroy($id)
     {
-        //
-        //rechercher l 'Decision
-        $Decision = Decision::find($id);
-        if (!$Decision) {
-            // si Decision introuvable retourner un message
-            return response()->json(['Message' => 'Décision Introuvable']);
+        $decision = Decision::find($id);
+
+        if (!$decision) {
+            return response()->json(['error' => 'Decision not found'], 404);
         }
-        // si nous l'avons trouver on le supprime et retourner un message
-        $Decision->delete();
-        return response()->json(['Message' => 'Décision Supprimé']);
+
+        $decision->delete();
+
+        return response()->json(['message' => 'Decision deleted successfully']);
     }
 }
