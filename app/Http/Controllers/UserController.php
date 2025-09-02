@@ -5,14 +5,46 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Hash;
+
+
+/**
+ * @OA\Tag(
+ *     name="Users",
+ *     description="User management endpoints"
+ * )
+ */
 
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @OA\Get(
+     *     path="/api/user",
+     *     operationId="getUsers",
+     *     tags={"Users"},
+     *     summary="Get all users",
+     *     description="Retrieve a list of all users in the system",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(
+                 @OA\Property(property="id", type="integer", example=1),
+                 @OA\Property(property="nom", type="string", example="Doe"),
+                 @OA\Property(property="prenom", type="string", example="John"),
+                 @OA\Property(property="Tel", type="string", example="+1234567890"),
+                 @OA\Property(property="role", type="string", example="user"),
+                 @OA\Property(property="login", type="string", example="johndoe"),
+                 @OA\Property(property="created_at", type="string", format="date-time"),
+                 @OA\Property(property="updated_at", type="string", format="date-time")
+             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error"
+     *     )
+     * )
      */
     public function index()
     {
@@ -31,10 +63,53 @@ class UserController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @OA\Post(
+     *     path="/api/user",
+     *     operationId="createUser",
+     *     tags={"Users"},
+     *     summary="Create a new user",
+     *     description="Create a new user with the provided information",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+             required={"nom", "prenom", "Tel", "role", "login"},
+             @OA\Property(property="nom", type="string", example="Doe", maxLength=255),
+             @OA\Property(property="prenom", type="string", example="John", maxLength=255),
+             @OA\Property(property="Tel", type="string", example="+1234567890", maxLength=50),
+             @OA\Property(property="role", type="string", example="user", maxLength=255),
+             @OA\Property(property="login", type="string", example="johndoe", maxLength=50)
+         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="User created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User created successfully"),
+     *             @OA\Property(property="data", type="object", properties={
+                 @OA\Property(property="id", type="integer", example=1),
+                 @OA\Property(property="nom", type="string", example="Doe"),
+                 @OA\Property(property="prenom", type="string", example="John"),
+                 @OA\Property(property="Tel", type="string", example="+1234567890"),
+                 @OA\Property(property="role", type="string", example="user"),
+                 @OA\Property(property="login", type="string", example="johndoe"),
+                 @OA\Property(property="created_at", type="string", format="date-time"),
+                 @OA\Property(property="updated_at", type="string", format="date-time")
+             })
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="errors", type="object"),
+     *             @OA\Property(property="message", type="string", example="Validation failed")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Unprocessable entity"
+     *     )
+     * )
      */
     public function store(Request $request)
     {
@@ -44,8 +119,6 @@ class UserController extends Controller
             'Tel' => 'required|string|max:50',
             'role' => 'required|string|max:255',
             'login' => 'required|string|max:50|unique:users',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
         ]);
 
         if ($validator->fails()) {
@@ -58,8 +131,6 @@ class UserController extends Controller
             'Tel' => $request->Tel,
             'role' => $request->role,
             'login' => $request->login,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
         ]);
 
         return response()->json([
@@ -69,10 +140,41 @@ class UserController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @OA\Get(
+     *     path="/api/user/{id}",
+     *     operationId="getUser",
+     *     tags={"Users"},
+     *     summary="Get user by ID",
+     *     description="Retrieve a specific user by their ID",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="User ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+             @OA\Property(property="id", type="integer", example=1),
+             @OA\Property(property="nom", type="string", example="Doe"),
+             @OA\Property(property="prenom", type="string", example="John"),
+             @OA\Property(property="Tel", type="string", example="+1234567890"),
+             @OA\Property(property="role", type="string", example="user"),
+             @OA\Property(property="login", type="string", example="johndoe"),
+             @OA\Property(property="created_at", type="string", format="date-time"),
+             @OA\Property(property="updated_at", type="string", format="date-time")
+         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="User not found")
+     *         )
+     *     )
+     * )
      */
     public function show($id)
     {
@@ -117,19 +219,15 @@ class UserController extends Controller
             'Tel' => 'sometimes|required|string|max:50',
             'role' => 'sometimes|required|string|max:255',
             'login' => 'sometimes|required|string|max:50|unique:users,login,' . $id,
-            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $id,
-            'password' => 'sometimes|required|string|min:8',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
 
-        $updateData = $request->only(['nom', 'prenom', 'Tel', 'role', 'login', 'email']);
+        $updateData = $request->only(['nom', 'prenom', 'Tel', 'role', 'login']);
 
-        if ($request->has('password')) {
-            $updateData['password'] = Hash::make($request->password);
-        }
+
 
         $user->update($updateData);
 
