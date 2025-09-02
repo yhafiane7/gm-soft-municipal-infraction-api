@@ -39,9 +39,13 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
+            'nom' => 'required|string|max:255',
+            'prenom' => 'required|string|max:255',
+            'Tel' => 'required|string|max:50',
+            'role' => 'required|string|max:255',
+            'login' => 'required|string|max:50|unique:users',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         if ($validator->fails()) {
@@ -49,7 +53,11 @@ class UserController extends Controller
         }
 
         $user = User::create([
-            'name' => $request->name,
+            'nom' => $request->nom,
+            'prenom' => $request->prenom,
+            'Tel' => $request->Tel,
+            'role' => $request->role,
+            'login' => $request->login,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
@@ -104,7 +112,11 @@ class UserController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'sometimes|required|string|max:255',
+            'nom' => 'sometimes|required|string|max:255',
+            'prenom' => 'sometimes|required|string|max:255',
+            'Tel' => 'sometimes|required|string|max:50',
+            'role' => 'sometimes|required|string|max:255',
+            'login' => 'sometimes|required|string|max:50|unique:users,login,' . $id,
             'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $id,
             'password' => 'sometimes|required|string|min:8',
         ]);
@@ -113,7 +125,7 @@ class UserController extends Controller
             return response()->json(['errors' => $validator->errors()], 400);
         }
 
-        $updateData = $request->only(['name', 'email']);
+        $updateData = $request->only(['nom', 'prenom', 'Tel', 'role', 'login', 'email']);
 
         if ($request->has('password')) {
             $updateData['password'] = Hash::make($request->password);

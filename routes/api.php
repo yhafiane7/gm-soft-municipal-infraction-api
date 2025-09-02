@@ -27,6 +27,8 @@ Route::get('/test', function (Request $request) {
     return  'test';
 });
 
+
+
 Route::resource('/agent', AgentController::class);
 Route::resource('/categorie', CategorieController::class);
 Route::resource('/commune', CommuneController::class);
@@ -34,7 +36,3 @@ Route::resource('/decision', DecisionController::class);
 Route::resource('/infraction', InfractionController::class);
 Route::resource('/user', UserController::class);
 Route::resource('violant', ViolantController::class);
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
