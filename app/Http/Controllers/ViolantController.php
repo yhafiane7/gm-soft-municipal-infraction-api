@@ -7,6 +7,13 @@ use App\Models\Violant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @OA\Tag(
+ *     name="Violants",
+ *     description="Violant management endpoints"
+ * )
+ */
+
 class ViolantController extends Controller
 {
     /**
@@ -108,7 +115,28 @@ class ViolantController extends Controller
             return response()->json(['error' => 'Violant not found'], 404);
         }
 
-        $violant->update($request->all());
+        $validator = Validator::make($request->all(), [
+            'nom' => 'sometimes|string|max:50|min:2',
+            'prenom' => 'sometimes|string|max:50|min:2',
+            'cin' => 'sometimes|string|max:12|unique:violant,cin,' . $id . '|regex:/^[A-Z0-9]+$/'
+        ], [
+            'nom.min' => 'The last name must be at least 2 characters.',
+            'prenom.min' => 'The first name must be at least 2 characters.',
+            'cin.regex' => 'The CIN must contain only uppercase letters and numbers.',
+            'cin.max' => 'The CIN must be at most 12 characters.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
+
+        $updateData = $request->only(['nom', 'prenom', 'cin']);
+
+        if (isset($updateData['cin'])) {
+            $updateData['cin'] = strtoupper(trim($updateData['cin']));
+        }
+
+        $violant->update($updateData);
 
         return response()->json([
             'message' => 'Violant updated successfully',

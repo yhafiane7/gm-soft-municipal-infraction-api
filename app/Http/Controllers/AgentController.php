@@ -7,12 +7,43 @@ use App\Models\Agent;
 use App\Models\Infraction;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @OA\Tag(
+ *     name="Agents",
+ *     description="Agent management endpoints"
+ * )
+ */
+
 class AgentController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @OA\Get(
+     *     path="/api/agent",
+     *     operationId="getAgents",
+     *     tags={"Agents"},
+     *     summary="Get all agents",
+     *     description="Retrieve a list of all agents in the system",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="nom", type="string", example="Smith"),
+     *                 @OA\Property(property="prenom", type="string", example="John"),
+     *                 @OA\Property(property="tel", type="string", example="1234567890"),
+     *                 @OA\Property(property="cin", type="string", example="AB123456"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error"
+     *     )
+     * )
      */
     public function index()
     {
@@ -31,10 +62,51 @@ class AgentController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @OA\Post(
+     *     path="/api/agent",
+     *     operationId="createAgent",
+     *     tags={"Agents"},
+     *     summary="Create a new agent",
+     *     description="Create a new agent with the provided information",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"nom", "prenom", "tel", "cin"},
+     *             @OA\Property(property="nom", type="string", example="Smith", minLength=2, maxLength=50),
+     *             @OA\Property(property="prenom", type="string", example="John", minLength=2, maxLength=50),
+     *             @OA\Property(property="tel", type="string", example="1234567890", minLength=10, maxLength=10, pattern="^[0-9]+$"),
+     *             @OA\Property(property="cin", type="string", example="AB123456", maxLength=12, pattern="^[A-Z0-9]+$")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Agent created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Agent created successfully"),
+     *             @OA\Property(property="data", type="object", properties={
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="nom", type="string", example="Smith"),
+     *                 @OA\Property(property="prenom", type="string", example="John"),
+     *                 @OA\Property(property="tel", type="string", example="1234567890"),
+     *                 @OA\Property(property="cin", type="string", example="AB123456"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             })
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="errors", type="object"),
+     *             @OA\Property(property="message", type="string", example="Validation failed")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Unprocessable entity"
+     *     )
+     * )
      */
     public function store(Request $request)
     {

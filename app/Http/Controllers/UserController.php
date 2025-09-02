@@ -199,11 +199,62 @@ class UserController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @OA\Put(
+     *     path="/api/user/{id}",
+     *     operationId="updateUser",
+     *     tags={"Users"},
+     *     summary="Update a user",
+     *     description="Update an existing user with the provided information",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="User ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="nom", type="string", example="Doe", maxLength=255),
+     *             @OA\Property(property="prenom", type="string", example="John", maxLength=255),
+     *             @OA\Property(property="Tel", type="string", example="+1234567890", maxLength=50),
+     *             @OA\Property(property="role", type="string", example="user", maxLength=255),
+     *             @OA\Property(property="login", type="string", example="johndoe", maxLength=50)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User updated successfully"),
+     *             @OA\Property(property="data", type="object", properties={
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="nom", type="string", example="Doe"),
+     *                 @OA\Property(property="prenom", type="string", example="John"),
+     *                 @OA\Property(property="Tel", type="string", example="+1234567890"),
+     *                 @OA\Property(property="role", type="string", example="user"),
+     *                 @OA\Property(property="login", type="string", example="johndoe"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             })
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="errors", type="object"),
+     *             @OA\Property(property="message", type="string", example="Validation failed")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="User not found")
+     *         )
+     *     )
+     * )
      */
     public function update(Request $request, $id)
     {
@@ -238,10 +289,34 @@ class UserController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @OA\Delete(
+     *     path="/api/user/{id}",
+     *     operationId="deleteUser",
+     *     tags={"Users"},
+     *     summary="Delete a user",
+     *     description="Delete a user from the system",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="User ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="User deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="User not found")
+     *         )
+     *     )
+     * )
      */
     public function destroy($id)
     {

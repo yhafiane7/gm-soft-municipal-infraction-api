@@ -7,12 +7,48 @@ use App\Models\Infraction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @OA\Tag(
+ *     name="Infractions",
+ *     description="Infraction management endpoints"
+ * )
+ */
+
 class InfractionController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @OA\Get(
+     *     path="/api/infraction",
+     *     operationId="getInfractions",
+     *     tags={"Infractions"},
+     *     summary="Get all infractions",
+     *     description="Retrieve a list of all infractions in the system",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="nom", type="string", example="Speeding"),
+     *                 @OA\Property(property="date", type="string", format="date", example="2023-12-01"),
+     *                 @OA\Property(property="adresse", type="string", example="123 Main Street"),
+     *                 @OA\Property(property="commune_id", type="integer", example=1),
+     *                 @OA\Property(property="violant_id", type="integer", example=1),
+     *                 @OA\Property(property="agent_id", type="integer", example=1),
+     *                 @OA\Property(property="categorie_id", type="integer", example=1),
+     *                 @OA\Property(property="latitude", type="number", format="float", example=45.5017),
+     *                 @OA\Property(property="longitude", type="number", format="float", example=-73.5673),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error"
+     *     )
+     * )
      */
     public function index()
     {
@@ -31,10 +67,61 @@ class InfractionController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @OA\Post(
+     *     path="/api/infraction",
+     *     operationId="createInfraction",
+     *     tags={"Infractions"},
+     *     summary="Create a new infraction",
+     *     description="Create a new infraction with the provided information",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"nom", "date", "adresse", "commune_id", "violant_id", "agent_id", "categorie_id", "latitude", "longitude"},
+     *             @OA\Property(property="nom", type="string", example="Speeding", minLength=2, maxLength=100),
+     *             @OA\Property(property="date", type="string", format="date", example="2023-12-01"),
+     *             @OA\Property(property="adresse", type="string", example="123 Main Street", minLength=5, maxLength=255),
+     *             @OA\Property(property="commune_id", type="integer", example=1),
+     *             @OA\Property(property="violant_id", type="integer", example=1),
+     *             @OA\Property(property="agent_id", type="integer", example=1),
+     *             @OA\Property(property="categorie_id", type="integer", example=1),
+     *             @OA\Property(property="latitude", type="number", format="float", example=45.5017, minimum=-90, maximum=90),
+     *             @OA\Property(property="longitude", type="number", format="float", example=-73.5673, minimum=-180, maximum=180)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Infraction created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Infraction created successfully"),
+     *             @OA\Property(property="data", type="object", properties={
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="nom", type="string", example="Speeding"),
+     *                 @OA\Property(property="date", type="string", format="date", example="2023-12-01"),
+     *                 @OA\Property(property="adresse", type="string", example="123 Main Street"),
+     *                 @OA\Property(property="commune_id", type="integer", example=1),
+     *                 @OA\Property(property="violant_id", type="integer", example=1),
+     *                 @OA\Property(property="agent_id", type="integer", example=1),
+     *                 @OA\Property(property="categorie_id", type="integer", example=1),
+     *                 @OA\Property(property="latitude", type="number", format="float", example=45.5017),
+     *                 @OA\Property(property="longitude", type="number", format="float", example=-73.5673),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             })
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="errors", type="object"),
+     *             @OA\Property(property="message", type="string", example="Validation failed")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Unprocessable entity"
+     *     )
+     * )
      */
     public function store(Request $request)
     {
@@ -85,10 +172,45 @@ class InfractionController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @OA\Get(
+     *     path="/api/infraction/{id}",
+     *     operationId="getInfraction",
+     *     tags={"Infractions"},
+     *     summary="Get infraction by ID",
+     *     description="Retrieve a specific infraction by its ID",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Infraction ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="nom", type="string", example="Speeding"),
+     *             @OA\Property(property="date", type="string", format="date", example="2023-12-01"),
+     *             @OA\Property(property="adresse", type="string", example="123 Main Street"),
+     *             @OA\Property(property="commune_id", type="integer", example=1),
+     *             @OA\Property(property="violant_id", type="integer", example=1),
+     *             @OA\Property(property="agent_id", type="integer", example=1),
+     *             @OA\Property(property="categorie_id", type="integer", example=1),
+     *             @OA\Property(property="latitude", type="number", format="float", example=45.5017),
+     *             @OA\Property(property="longitude", type="number", format="float", example=-73.5673),
+     *             @OA\Property(property="created_at", type="string", format="date-time"),
+     *             @OA\Property(property="updated_at", type="string", format="date-time")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Infraction not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Infraction not found")
+     *         )
+     *     )
+     * )
      */
     public function show($id)
     {
@@ -113,11 +235,70 @@ class InfractionController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @OA\Put(
+     *     path="/api/infraction/{id}",
+     *     operationId="updateInfraction",
+     *     tags={"Infractions"},
+     *     summary="Update an infraction",
+     *     description="Update an existing infraction with the provided information",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Infraction ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\RequestBody(
+     *         required=false,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="nom", type="string", example="Speeding", minLength=2, maxLength=100),
+     *             @OA\Property(property="date", type="string", format="date", example="2023-12-01"),
+     *             @OA\Property(property="adresse", type="string", example="123 Main Street", minLength=5, maxLength=255),
+     *             @OA\Property(property="commune_id", type="integer", example=1),
+     *             @OA\Property(property="violant_id", type="integer", example=1),
+     *             @OA\Property(property="agent_id", type="integer", example=1),
+     *             @OA\Property(property="categorie_id", type="integer", example=1),
+     *             @OA\Property(property="latitude", type="number", format="float", example=45.5017, minimum=-90, maximum=90),
+     *             @OA\Property(property="longitude", type="number", format="float", example=-73.5673, minimum=-180, maximum=180)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Infraction updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Infraction updated successfully"),
+     *             @OA\Property(property="data", type="object", properties={
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="nom", type="string", example="Speeding"),
+     *                 @OA\Property(property="date", type="string", format="date", example="2023-12-01"),
+     *                 @OA\Property(property="adresse", type="string", example="123 Main Street"),
+     *                 @OA\Property(property="commune_id", type="integer", example=1),
+     *                 @OA\Property(property="violant_id", type="integer", example=1),
+     *                 @OA\Property(property="agent_id", type="integer", example=1),
+     *                 @OA\Property(property="categorie_id", type="integer", example=1),
+     *                 @OA\Property(property="latitude", type="number", format="float", example=45.5017),
+     *                 @OA\Property(property="longitude", type="number", format="float", example=-73.5673),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             })
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="errors", type="object"),
+     *             @OA\Property(property="message", type="string", example="Validation failed")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Infraction not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Infraction not found")
+     *         )
+     *     )
+     * )
      */
     public function update(Request $request, $id)
     {
@@ -191,10 +372,42 @@ class InfractionController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @OA\Delete(
+     *     path="/api/infraction/{id}",
+     *     operationId="deleteInfraction",
+     *     tags={"Infractions"},
+     *     summary="Delete an infraction",
+     *     description="Delete an infraction if it's not referenced in any decision",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Infraction ID",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Infraction deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Infraction deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Infraction not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Infraction not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="Conflict - Cannot delete infraction",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="Cannot delete infraction"),
+     *             @OA\Property(property="message", type="string", example="Infraction is referenced in decision: 1")
+     *         )
+     *     )
+     * )
      */
     public function destroy($id)
     {

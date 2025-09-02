@@ -1,6 +1,7 @@
 <?php
 
 namespace Database\Factories;
+
 use App\Models\Categorie;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -18,9 +19,8 @@ class CategorieFactory extends Factory
     public function definition()
     {
         return [
-            //
-            'nom'=>$this->faker->safeColorName(),// i am using safecolorName to give color name for each categorie
-            'degre'=>$this->faker->randomNumber(9)
+            'nom' => $this->faker->words(2, true), // Generate category names
+            'degre' => $this->faker->numberBetween(1, 5) // Generate degrees between 1-5
         ];
     }
 }

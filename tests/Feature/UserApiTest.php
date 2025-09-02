@@ -44,19 +44,23 @@ class UserApiTest extends TestCase
                 'data' => [
                     'nom' => 'John',
                     'prenom' => 'Doe',
-                    'email' => 'john@example.com',
+                    'Tel' => '+1234567890',
+                    'role' => 'user',
+                    'login' => 'johndoe',
                 ]
             ]);
 
         $this->assertDatabaseHas('users', [
             'nom' => 'John',
             'prenom' => 'Doe',
-            'email' => 'john@example.com',
+            'Tel' => '+1234567890',
+            'role' => 'user',
+            'login' => 'johndoe',
         ]);
 
         // Check that user was created
         $this->assertDatabaseHas('users', [
-            'email' => 'john@example.com',
+            'login' => 'johndoe',
         ]);
     }
 
@@ -71,74 +75,11 @@ class UserApiTest extends TestCase
                 'prenom',
                 'Tel',
                 'role',
-                'login',
-                'email',
-                'password'
+                'login'
             ]);
     }
 
-    /** @test */
-    public function it_validates_email_format()
-    {
-        $userData = [
-            'nom' => 'John',
-            'prenom' => 'Doe',
-            'Tel' => '+1234567890',
-            'role' => 'user',
-            'login' => 'johndoe',
-            'email' => 'invalid-email',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
-        ];
 
-        $response = $this->postJson('/api/user', $userData);
-
-        $response->assertStatus(400)
-            ->assertJsonValidationErrors(['email']);
-    }
-
-    /** @test */
-    public function it_validates_password_confirmation()
-    {
-        $userData = [
-            'nom' => 'John',
-            'prenom' => 'Doe',
-            'Tel' => '+1234567890',
-            'role' => 'user',
-            'login' => 'johndoe',
-            'email' => 'john@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'different-password',
-        ];
-
-        $response = $this->postJson('/api/user', $userData);
-
-        $response->assertStatus(400)
-            ->assertJsonValidationErrors(['password']);
-    }
-
-    /** @test */
-    public function it_validates_unique_email()
-    {
-        // Create a user first
-        User::factory()->create(['email' => 'john@example.com']);
-
-        $userData = [
-            'nom' => 'Jane',
-            'prenom' => 'Doe',
-            'Tel' => '+1234567890',
-            'role' => 'user',
-            'login' => 'janedoe',
-            'email' => 'john@example.com', // Same email
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
-        ];
-
-        $response = $this->postJson('/api/user', $userData);
-
-        $response->assertStatus(400)
-            ->assertJsonValidationErrors(['email']);
-    }
 
     /** @test */
     public function it_can_show_a_specific_user()
@@ -152,11 +93,10 @@ class UserApiTest extends TestCase
                 'id' => $user->id,
                 'nom' => $user->nom,
                 'prenom' => $user->prenom,
-                'email' => $user->email,
+                'Tel' => $user->Tel,
+                'role' => $user->role,
+                'login' => $user->login,
             ]);
-
-        // Password should not be visible
-        $response->assertJsonMissing(['password']);
     }
 
     /** @test */
@@ -176,7 +116,6 @@ class UserApiTest extends TestCase
         $updateData = [
             'nom' => 'Updated',
             'prenom' => 'Name',
-            'email' => 'updated@example.com',
         ];
 
         $response = $this->putJson("/api/user/{$user->id}", $updateData);
@@ -187,7 +126,6 @@ class UserApiTest extends TestCase
                 'data' => [
                     'nom' => 'Updated',
                     'prenom' => 'Name',
-                    'email' => 'updated@example.com',
                 ]
             ]);
 
@@ -195,7 +133,6 @@ class UserApiTest extends TestCase
             'id' => $user->id,
             'nom' => 'Updated',
             'prenom' => 'Name',
-            'email' => 'updated@example.com',
         ]);
     }
 

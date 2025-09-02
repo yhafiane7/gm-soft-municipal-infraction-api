@@ -6,12 +6,42 @@ use App\Models\Decision;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @OA\Tag(
+ *     name="Decisions",
+ *     description="Decision management endpoints"
+ * )
+ */
+
 class DecisionController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @OA\Get(
+     *     path="/api/decision",
+     *     operationId="getDecisions",
+     *     tags={"Decisions"},
+     *     summary="Get all decisions",
+     *     description="Retrieve a list of all decisions in the system",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="date", type="string", format="date", example="2023-12-15"),
+     *                 @OA\Property(property="decisionprise", type="string", example="Fine of 150 DH"),
+     *                 @OA\Property(property="infraction_id", type="integer", example=1),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error"
+     *     )
+     * )
      */
     public function index()
     {
@@ -30,10 +60,49 @@ class DecisionController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @OA\Post(
+     *     path="/api/decision",
+     *     operationId="createDecision",
+     *     tags={"Decisions"},
+     *     summary="Create a new decision",
+     *     description="Create a new decision for an infraction",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"date", "decisionprise", "infraction_id"},
+     *             @OA\Property(property="date", type="string", format="date", example="2023-12-15"),
+     *             @OA\Property(property="decisionprise", type="string", example="Fine of 150 DH", minLength=5, maxLength=200),
+     *             @OA\Property(property="infraction_id", type="integer", example=1)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Decision created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Decision created successfully"),
+     *             @OA\Property(property="data", type="object", properties={
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="date", type="string", format="date", example="2023-12-15"),
+     *                 @OA\Property(property="decisionprise", type="string", example="Fine of 150 DH"),
+     *                 @OA\Property(property="infraction_id", type="integer", example=1),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             })
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="errors", type="object"),
+     *             @OA\Property(property="message", type="string", example="Validation failed")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Unprocessable entity"
+     *     )
+     * )
      */
     public function store(Request $request)
     {
