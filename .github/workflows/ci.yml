@@ -55,6 +55,9 @@ jobs:
       - name: Generate application key
         run: php artisan key:generate
 
+      - name: Copy environment file
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
       - name: Wait for PostgreSQL to be ready
         run: |
           while ! pg_isready -h"127.0.0.1" -p5432 -U"testing"; do
