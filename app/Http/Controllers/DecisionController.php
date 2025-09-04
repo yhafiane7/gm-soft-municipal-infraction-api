@@ -6,18 +6,47 @@ use App\Models\Decision;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @OA\Tag(
+ *     name="Decisions",
+ *     description="Decision management endpoints"
+ * )
+ */
+
 class DecisionController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @OA\Get(
+     *     path="/api/decision",
+     *     operationId="getDecisions",
+     *     tags={"Decisions"},
+     *     summary="Get all decisions",
+     *     description="Retrieve a list of all decisions in the system",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="date", type="string", format="date", example="2023-12-15"),
+     *                 @OA\Property(property="decisionprise", type="string", example="Fine of 150 DH"),
+     *                 @OA\Property(property="infraction_id", type="integer", example=1),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error"
+     *     )
+     * )
      */
     public function index()
     {
-        //
-        $AllDecision = Decision::all();
-        return $AllDecision;
+        $decisions = Decision::all();
+        return response()->json($decisions);
     }
 
     /**
@@ -31,28 +60,75 @@ class DecisionController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @OA\Post(
+     *     path="/api/decision",
+     *     operationId="createDecision",
+     *     tags={"Decisions"},
+     *     summary="Create a new decision",
+     *     description="Create a new decision for an infraction",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"date", "decisionprise", "infraction_id"},
+     *             @OA\Property(property="date", type="string", format="date", example="2023-12-15"),
+     *             @OA\Property(property="decisionprise", type="string", example="Fine of 150 DH", minLength=5, maxLength=200),
+     *             @OA\Property(property="infraction_id", type="integer", example=1)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Decision created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Decision created successfully"),
+     *             @OA\Property(property="data", type="object", properties={
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="date", type="string", format="date", example="2023-12-15"),
+     *                 @OA\Property(property="decisionprise", type="string", example="Fine of 150 DH"),
+     *                 @OA\Property(property="infraction_id", type="integer", example=1),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             })
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="errors", type="object"),
+     *             @OA\Property(property="message", type="string", example="Validation failed")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Unprocessable entity"
+     *     )
+     * )
      */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'date' => 'required|date',
-            'decisionprise' => 'required|max:200',
-            'infraction_id' => 'required|exists:infraction,id',
+            'date' => 'required|date|before_or_equal:today',
+            'decisionprise' => 'required|string|max:200|min:5',
+            'infraction_id' => 'required|integer|exists:infraction,id',
+        ], [
+            'date.before_or_equal' => 'The decision date cannot be in the future.',
+            'decisionprise.min' => 'The decision must be at least 5 characters.',
         ]);
-    
+
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
-    
-        Decision::create([
+
+        $decision = Decision::create([
             'date' => $request->date,
-            'decisionprise' => $request->decisionprise,
+            'decisionprise' => trim($request->decisionprise),
             'infraction_id' => $request->infraction_id,
         ]);
+
+        return response()->json([
+            'message' => 'Decision created successfully',
+            'data' => $decision
+        ], 201);
     }
 
     /**
@@ -63,14 +139,13 @@ class DecisionController extends Controller
      */
     public function show($id)
     {
-        //
-        $Decision = Decision::find($id);
+        $decision = Decision::find($id);
 
-        if (!$Decision) {
-            return response()->json(['Error' => 'Décision Introuvable']);
+        if (!$decision) {
+            return response()->json(['error' => 'Decision not found'], 404);
         }
 
-        return response()->json($Decision);
+        return response()->json($decision);
     }
 
     /**
@@ -93,17 +168,18 @@ class DecisionController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $Decision = Decision::find($id);
+        $decision = Decision::find($id);
 
-        if (!$Decision) {
-            return response()->json(['Error' => 'Agent Introuvable']);
-        }else{
-            $time=strtotime($request->date);
-            $time=date('Y-m-d',$time);
-            $Decision->update($request->all());
+        if (!$decision) {
+            return response()->json(['error' => 'Decision not found'], 404);
         }
 
-        return response()->json($Decision);
+        $decision->update($request->all());
+
+        return response()->json([
+            'message' => 'Decision updated successfully',
+            'data' => $decision
+        ]);
     }
 
     /**
@@ -114,15 +190,14 @@ class DecisionController extends Controller
      */
     public function destroy($id)
     {
-        //
-        //rechercher l 'Decision
-        $Decision = Decision::find($id);
-        if (!$Decision) {
-            // si Decision introuvable retourner un message
-            return response()->json(['Message' => 'Décision Introuvable']);
+        $decision = Decision::find($id);
+
+        if (!$decision) {
+            return response()->json(['error' => 'Decision not found'], 404);
         }
-        // si nous l'avons trouver on le supprime et retourner un message
-        $Decision->delete();
-        return response()->json(['Message' => 'Décision Supprimé']);
+
+        $decision->delete();
+
+        return response()->json(['message' => 'Decision deleted successfully']);
     }
 }

@@ -2,24 +2,53 @@
 
 namespace App\Http\Controllers;
 
-
 use Illuminate\Http\Request;
 use App\Models\Agent;
 use App\Models\Infraction;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @OA\Tag(
+ *     name="Agents",
+ *     description="Agent management endpoints"
+ * )
+ */
+
 class AgentController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @OA\Get(
+     *     path="/api/agent",
+     *     operationId="getAgents",
+     *     tags={"Agents"},
+     *     summary="Get all agents",
+     *     description="Retrieve a list of all agents in the system",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="nom", type="string", example="Smith"),
+     *                 @OA\Property(property="prenom", type="string", example="John"),
+     *                 @OA\Property(property="tel", type="string", example="1234567890"),
+     *                 @OA\Property(property="cin", type="string", example="AB123456"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error"
+     *     )
+     * )
      */
     public function index()
     {
-        $AllAgent = Agent::all();
-
-        return response()->json($AllAgent) ;
+        $agents = Agent::all();
+        return response()->json($agents);
     }
 
     /**
@@ -33,28 +62,83 @@ class AgentController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @OA\Post(
+     *     path="/api/agent",
+     *     operationId="createAgent",
+     *     tags={"Agents"},
+     *     summary="Create a new agent",
+     *     description="Create a new agent with the provided information",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"nom", "prenom", "tel", "cin"},
+     *             @OA\Property(property="nom", type="string", example="Smith", minLength=2, maxLength=50),
+     *             @OA\Property(property="prenom", type="string", example="John", minLength=2, maxLength=50),
+     *             @OA\Property(property="tel", type="string", example="1234567890", minLength=10, maxLength=10, pattern="^[0-9]+$"),
+     *             @OA\Property(property="cin", type="string", example="AB123456", maxLength=12, pattern="^[A-Z0-9]+$")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Agent created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Agent created successfully"),
+     *             @OA\Property(property="data", type="object", properties={
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="nom", type="string", example="Smith"),
+     *                 @OA\Property(property="prenom", type="string", example="John"),
+     *                 @OA\Property(property="tel", type="string", example="1234567890"),
+     *                 @OA\Property(property="cin", type="string", example="AB123456"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             })
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="errors", type="object"),
+     *             @OA\Property(property="message", type="string", example="Validation failed")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Unprocessable entity"
+     *     )
+     * )
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(),[
-            'nom'=>'required|max:50',
-            'prenom'=>'required|max:50',
-            'tel'=>'required|max:10|unique:agent,tel',
-            'cin'=>'required|max:12|unique:agent,cin'
+        $validator = Validator::make($request->all(), [
+            'nom' => 'required|string|max:50|min:2',
+            'prenom' => 'required|string|max:50|min:2',
+            'tel' => 'required|string|max:10|min:10|unique:agent,tel|regex:/^[0-9]+$/',
+            'cin' => 'required|string|max:12|unique:agent,cin|regex:/^[A-Z0-9]+$/'
+        ], [
+            'nom.min' => 'The last name must be at least 2 characters.',
+            'prenom.min' => 'The first name must be at least 2 characters.',
+            'tel.regex' => 'The phone number must contain only digits.',
+            'tel.min' => 'The phone number must be exactly 10 digits.',
+            'cin.regex' => 'The CIN must contain only uppercase letters and numbers.',
+            'cin.max' => 'The CIN must be at most 12 characters.',
         ]);
+
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
-        Agent::create([
-            'nom'=>$request->nom,
-            'prenom'=>$request->prenom,
-            'tel'=>$request->tel,
-            'cin'=>$request->cin,
+
+        $agent = Agent::create([
+            'nom' => trim($request->nom),
+            'prenom' => trim($request->prenom),
+            'tel' => trim($request->tel),
+            'cin' => strtoupper(trim($request->cin)),
         ]);
+
+        return response()->json([
+            'message' => 'Agent created successfully',
+            'data' => $agent
+        ], 201);
     }
 
     /**
@@ -65,14 +149,13 @@ class AgentController extends Controller
      */
     public function show($id)
     {
-        //
-        $Agent = Agent::find($id);
+        $agent = Agent::find($id);
 
-        if (!$Agent) {
-            return response()->json(['Error' => 'Agent Introuvable']);
+        if (!$agent) {
+            return response()->json(['error' => 'Agent not found'], 404);
         }
 
-        return response()->json($Agent);
+        return response()->json($agent);
     }
 
     /**
@@ -84,7 +167,6 @@ class AgentController extends Controller
     public function edit($id)
     {
         //
-        
     }
 
     /**
@@ -96,16 +178,18 @@ class AgentController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
-        $Agent = Agent::find($id);
+        $agent = Agent::find($id);
 
-        if (!$Agent) {
-            return response()->json(['Error' => 'Agent Introuvable']);
-        }else{
-            $Agent->update($request->all());
+        if (!$agent) {
+            return response()->json(['error' => 'Agent not found'], 404);
         }
 
-        return response()->json($Agent);
+        $agent->update($request->all());
+
+        return response()->json([
+            'message' => 'Agent updated successfully',
+            'data' => $agent
+        ]);
     }
 
     /**
@@ -116,23 +200,22 @@ class AgentController extends Controller
      */
     public function destroy($id)
     {
-        
         $infraction = Infraction::firstWhere("agent_id", $id);
         $agent = Agent::find($id);
-    
+
         if (!$agent) {
-            // si Agent introuvable retourner un message
-            return response()->json(['Message' => 'Agent introuvable']);
+            return response()->json(['error' => 'Agent not found'], 404);
         }
-    
+
         if ($infraction) {
-             // si Agent se trouve dans une infraction retourner un message
-            $infractionId = $infraction->id;
-            return response()->json(['Message' => "L'Agent se trouve dans l'infraction: ".$infractionId]);
-        } else {
-            // si nous l'avons trouver on le supprime et retourner un message
-            $agent->delete();
-            return response()->json(['Message' => 'Agent supprimée']);
+            return response()->json([
+                'error' => 'Cannot delete agent',
+                'message' => "Agent is referenced in infraction: " . $infraction->id
+            ], 409);
         }
+
+        $agent->delete();
+
+        return response()->json(['message' => 'Agent deleted successfully']);
     }
 }

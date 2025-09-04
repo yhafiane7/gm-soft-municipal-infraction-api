@@ -1,8 +1,10 @@
 # Municipal Infraction Management API
 
 [![Laravel](https://img.shields.io/badge/Laravel-9.x-red.svg)](https://laravel.com)
-[![PHP](https://img.shields.io/badge/PHP-8.0+-blue.svg)](https://php.net)
-[![MySQL](https://img.shields.io/badge/MySQL-5.7+-green.svg)](https://mysql.com)
+[![PHP](https://img.shields.io/badge/PHP-8.1+-blue.svg)](https://php.net)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-blue.svg)](https://postgresql.org)
+[![CI/CD](https://img.shields.io/badge/CI/CD-GitHub%20Actions-blue.svg)](https://github.com/features/actions)
+[![Tests](https://img.shields.io/badge/Tests-PHPUnit-green.svg)](https://phpunit.de)
 [![License](https://img.shields.io/badge/License-Proprietary-orange.svg)](LICENSE)
 
 A comprehensive REST API for municipal infraction management built with Laravel. Developed for GM-SOFT to provide efficient data management for local government operations.
@@ -13,20 +15,24 @@ A comprehensive REST API for municipal infraction management built with Laravel.
 
 ## ✨ Features
 
--   🔐 **Authentication System** - Laravel Sanctum for secure API access
--   📍 **Geolocation Services** - Latitude/longitude tracking for infractions and communes
 -   📊 **Data Management** - Complete CRUD operations for 7 core entities
+-   📍 **Geolocation Services** - Latitude/longitude tracking for infractions and communes
 -   🔍 **Advanced Validation** - Comprehensive input validation with custom rules
 -   🗄️ **Database Integrity** - Foreign key relationships with cascade delete protection
 -   📱 **RESTful API** - Standard HTTP methods with JSON responses
+-   📚 **API Documentation** - Swagger/OpenAPI documentation
+-   🧪 **Test Coverage** - Comprehensive test suite with PHPUnit
+-   🚀 **CI/CD Pipeline** - Automated testing, building, and deployment
 
 ## 🛠️ Tech Stack
 
 -   **Backend Framework**: Laravel 9.x
--   **Programming Language**: PHP 8.0+
--   **Database**: MySQL 5.7+ / PostgreSQL 10+
--   **Authentication**: Laravel Sanctum
--   **API**: RESTful endpoints
+-   **Programming Language**: PHP 8.1+
+-   **Database**: PostgreSQL 15+
+-   **API**: RESTful endpoints with Swagger documentation
+-   **Testing**: PHPUnit with comprehensive coverage
+-   **CI/CD**: GitHub Actions
+-   **Documentation**: OpenAPI 3.0 (Swagger)
 
 ## 📊 Data Entities
 
@@ -36,7 +42,7 @@ A comprehensive REST API for municipal infraction management built with Laravel.
 -   **Communes** - Municipal areas with administrative boundaries
 -   **Categories** - Infraction classification system with severity degrees
 -   **Decisions** - Outcomes and rulings for infractions
--   **Users** - System user management and authentication
+-   **Users** - System user management (CRUD operations)
 
 ## 📋 API Endpoints
 
@@ -76,6 +82,14 @@ php artisan serve
 ```
 
 Visit `http://localhost:8000/api/test` to test the API.
+
+### 4. View API Documentation
+
+```bash
+# Generate Swagger documentation
+php artisan l5-swagger:generate
+# Access documentation at http://localhost:8000/api/documentation
+```
 
 ## 📝 Usage Examples
 
@@ -126,10 +140,20 @@ This API was developed for **GM-SOFT** to provide municipal governments with a c
 ## 🧪 Testing
 
 ```bash
+# Run tests
 php artisan test
 ```
 
+The project includes comprehensive CI pipeline with automated testing and code quality checks.
+
 ## 🚀 Deployment
+
+### Server Requirements
+
+-   **PHP**: 8.1+
+-   **Database**: PostgreSQL 15+
+-   **Composer**: Latest version
+-   **Web Server**: Apache/Nginx
 
 ### Production Build
 
@@ -137,23 +161,12 @@ php artisan test
 composer install --optimize-autoloader --no-dev
 php artisan config:cache
 php artisan route:cache
+php artisan view:cache
 ```
-
-### Server Requirements
-
--   PHP 8.0+
--   MySQL 5.7+ or PostgreSQL 10+
--   Composer
--   Web server (Apache/Nginx)
 
 ## 📄 License
 
 This project is proprietary software developed for GM-SOFT. All rights reserved.
-
-## 🙏 Acknowledgments
-
--   Laravel team for the amazing framework
--   GM-SOFT for the project opportunity
 
 ---
 
