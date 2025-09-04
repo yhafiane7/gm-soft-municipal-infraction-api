@@ -5,6 +5,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-blue.svg)](https://postgresql.org)
 [![CI/CD](https://img.shields.io/badge/CI/CD-GitHub%20Actions-blue.svg)](https://github.com/features/actions)
 [![Tests](https://img.shields.io/badge/Tests-PHPUnit-green.svg)](https://phpunit.de)
+[![codecov](https://codecov.io/github/yhafiane7/gm-soft-municipal-infraction-api/graph/badge.svg?token=IRJJ79JIMY)](https://codecov.io/github/yhafiane7/gm-soft-municipal-infraction-api)
 [![License](https://img.shields.io/badge/License-Proprietary-orange.svg)](LICENSE)
 
 A comprehensive REST API for municipal infraction management built with Laravel. Developed for GM-SOFT to provide efficient data management for local government operations.
