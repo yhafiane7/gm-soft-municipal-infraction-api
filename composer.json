@@ -15,7 +15,11 @@
         "laravel/sanctum": "^3.2",
         "laravel/tinker": "^2.7",
         "league/commonmark": "^2.7.0",
-        "nesbot/carbon": "^2.72.6"
+        "nesbot/carbon": "^2.72.6",
+        "symfony/css-selector": "^6.0",
+        "symfony/event-dispatcher": "^6.0",
+        "symfony/string": "^6.0",
+        "symfony/yaml": "^6.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
