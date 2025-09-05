@@ -1,0 +1,54 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+CI_SETUP.md
+DOCUMENTATION_SETUP.md
+
+# CI/CD
+.github
+
+# Tests
+tests
+phpunit.xml
+
+# Development files
+.env
+.env.example
+.env.local
+.env.testing
+
+# Logs
+storage/logs
+*.log
+
+# Cache
+storage/framework/cache
+storage/framework/sessions
+storage/framework/views
+bootstrap/cache
+
+# Node modules
+node_modules
+npm-debug.log
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Coverage
+coverage.xml
+coverage-html

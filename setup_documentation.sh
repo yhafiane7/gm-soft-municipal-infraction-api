@@ -3,12 +3,6 @@
 echo "🚀 Setting up API Documentation for INFRACTION-COMMUNE-BACKEND"
 echo "================================================================"
 
-# Check if composer is available
-if ! command -v composer &> /dev/null; then
-    echo "❌ Composer is not installed. Please install Composer first."
-    exit 1
-fi
-
 # Check if Laravel is available
 if ! command -v php &> /dev/null; then
     echo "❌ PHP is not installed. Please install PHP first."
@@ -17,13 +11,9 @@ fi
 
 echo "✅ Prerequisites check passed"
 
-# Install L5-Swagger package
-echo "📦 Installing L5-Swagger package..."
-composer require "darkaonline/l5-swagger"
-
-# Publish configuration
+# Publish configuration (only if not already published)
 echo "⚙️  Publishing configuration..."
-php artisan vendor:publish --provider "L5Swagger\L5SwaggerServiceProvider"
+php artisan vendor:publish --provider "L5Swagger\L5SwaggerServiceProvider" --force || true
 
 # Create storage directory if it doesn't exist
 echo "📁 Creating storage directory..."
@@ -33,10 +23,12 @@ mkdir -p storage/api-docs
 echo "📚 Generating initial documentation..."
 php artisan l5-swagger:generate
 
-# Clear cache
-echo "🧹 Clearing cache..."
-php artisan cache:clear
-php artisan config:clear
+# Clear cache (only in non-Docker environments)
+if [ -z "$DOCKER_CONTAINER" ]; then
+    echo "🧹 Clearing cache..."
+    php artisan cache:clear
+    php artisan config:clear
+fi
 
 echo ""
 echo "🎉 Documentation setup completed!"
