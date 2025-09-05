@@ -54,8 +54,12 @@ RUN if [ -f setup_documentation.sh ]; then \
         /usr/local/bin/setup_documentation.sh; \
     fi
 
-# Set permissions for Laravel storage and cache
-RUN chown -R www-data:www-data /var/www/html \
+# Create required directories for API and set permissions
+RUN mkdir -p /var/www/html/bootstrap/cache \
+    && mkdir -p /var/www/html/storage/logs \
+    && mkdir -p /var/www/html/storage/framework/cache \
+    && mkdir -p /var/www/html/storage/framework/sessions \
+    && chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
