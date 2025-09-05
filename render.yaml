@@ -4,7 +4,7 @@ services:
     env: docker
     dockerfilePath: ./Dockerfile
     plan: free
-    region: frankfurt
+    region: oregon
     branch: main
     envVars:
       - key: APP_ENV
@@ -34,10 +34,10 @@ services:
           name: infraction-commune-db
           property: password
 
-  databases:
+databases:
   - name: infraction-commune-db
     engine: POSTGRES
     version: "15"
     plan: free
-    region: frankfurt
+    region: oregon
     databaseName: infraction_commune
