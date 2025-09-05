@@ -4,7 +4,7 @@ services:
     env: docker
     dockerfilePath: ./Dockerfile
     plan: free
-    region: frankfurt
+    region: oregon
     branch: main
     envVars:
       - key: APP_ENV
@@ -37,5 +37,5 @@ services:
 databases:
   - name: infraction-commune-db
     plan: free
-    region: frankfurt
+    region: oregon
     databaseName: infraction_commune
