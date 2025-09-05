@@ -10,9 +10,8 @@ RUN composer install --no-dev --optimize-autoloader --prefer-dist --no-interacti
 # Copy entire project
 COPY . .
 
-# Run the post-autoload scripts manually after artisan exists
-RUN composer dump-autoload --optimize
-RUN php artisan package:discover
+# Skip the optimization that triggers artisan commands during build
+RUN composer dump-autoload --no-scripts
 
 ###### Stage 2: Runtime (Apache + PHP) ######
 FROM php:8.1-apache
@@ -45,24 +44,35 @@ RUN a2enmod rewrite
 # Copy Apache virtual host configuration
 COPY .docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
 
-# Copy application files
+# Copy application files from vendor stage
 COPY --from=vendor /app /var/www/html
 
-# Copy and run documentation setup script
-COPY setup_documentation.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/setup_documentation.sh
-RUN /usr/local/bin/setup_documentation.sh
+# Make documentation script optional (won't fail if missing)
+RUN if [ -f setup_documentation.sh ]; then \
+        cp setup_documentation.sh /usr/local/bin/ && \
+        chmod +x /usr/local/bin/setup_documentation.sh && \
+        /usr/local/bin/setup_documentation.sh; \
+    fi
 
-# Cache Laravel config, routes, and views
-RUN php artisan config:clear \
-    && php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
-
-# Permissions for Laravel storage and cache
+# Set permissions for Laravel storage and cache
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
+
+# Create entrypoint script for Laravel optimization at runtime
+RUN echo '#!/bin/bash\n\
+set -e\n\
+\n\
+# Run Laravel optimizations when container starts (when env vars are available)\n\
+php artisan package:discover --ansi || true\n\
+php artisan config:clear || true\n\
+php artisan config:cache || true\n\
+php artisan route:cache || true\n\
+php artisan view:cache || true\n\
+\n\
+# Start Apache\n\
+exec "$@"' > /usr/local/bin/docker-entrypoint.sh \
+    && chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Expose port 80
 EXPOSE 80
@@ -71,5 +81,6 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost/ || exit 1
 
-# Run Apache in foreground
+# Use entrypoint script
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["apache2-foreground"]
