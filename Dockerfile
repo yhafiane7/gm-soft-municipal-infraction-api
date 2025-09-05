@@ -47,38 +47,39 @@ COPY .docker/apache/000-default.conf /etc/apache2/sites-available/000-default.co
 # Copy application files from vendor stage
 COPY --from=vendor /app /var/www/html
 
-# Make documentation script optional (won't fail if missing)
+# Optional documentation script
 RUN if [ -f setup_documentation.sh ]; then \
         cp setup_documentation.sh /usr/local/bin/ && \
         chmod +x /usr/local/bin/setup_documentation.sh && \
         /usr/local/bin/setup_documentation.sh; \
     fi
 
-# Create required directories for API and set permissions
-RUN mkdir -p /var/www/html/bootstrap/cache \
-    && mkdir -p /var/www/html/storage/logs \
-    && mkdir -p /var/www/html/storage/framework/cache \
-    && mkdir -p /var/www/html/storage/framework/sessions \
+# Create required directories and set permissions
+RUN mkdir -p bootstrap/cache \
+    && mkdir -p storage/logs \
+    && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views \
     && chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
+    && chmod -R 755 storage bootstrap/cache
 
-# Create entrypoint script for Laravel optimization at runtime
+# Ensure resources/views exists (avoids view:clear error)
+RUN mkdir -p resources/views
+
+# Entrypoint script for runtime optimizations
 RUN echo '#!/bin/bash\n\
 set -e\n\
 \n\
-# Run Laravel optimizations when container starts (when env vars are available)\n\
+# Run Laravel optimizations at container start\n\
 php artisan package:discover --ansi || true\n\
 php artisan config:clear || true\n\
 php artisan config:cache || true\n\
 php artisan route:cache || true\n\
-php artisan view:clear || true\n\
+if [ -d resources/views ]; then php artisan view:clear || true; fi\n\
 \n\
 # Start Apache\n\
 exec "$@"' > /usr/local/bin/docker-entrypoint.sh \
     && chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Expose port 80
+# Expose port
 EXPOSE 80
 
 # Health check
