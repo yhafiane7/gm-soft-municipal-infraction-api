@@ -72,7 +72,7 @@ php artisan package:discover --ansi || true\n\
 php artisan config:clear || true\n\
 php artisan config:cache || true\n\
 php artisan route:cache || true\n\
-php artisan view:cache || true\n\
+php artisan view:clear || true\n\
 \n\
 # Start Apache\n\
 exec "$@"' > /usr/local/bin/docker-entrypoint.sh \
