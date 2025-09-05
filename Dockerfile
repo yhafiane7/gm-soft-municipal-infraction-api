@@ -68,21 +68,13 @@ RUN mkdir -p resources/views
 RUN echo '#!/bin/bash\n\
 set -e\n\
 \n\
-# Wait for database to be ready\n\
-echo "Waiting for database connection..."\n\
-while ! php artisan migrate:status > /dev/null 2>&1; do\n\
-    echo "Database not ready, waiting..."\n\
-    sleep 2\n\
-done\n\
-echo "Database is ready!"\n\
-\n\
 # Run database migrations\n\
 echo "Running database migrations..."\n\
-php artisan migrate --force || true\n\
+php artisan migrate --force || echo "Migrations failed, continuing..."\n\
 \n\
 # Run database seeding (optional)\n\
 echo "Running database seeding..."\n\
-php artisan db:seed --force || true\n\
+php artisan db:seed --force || echo "Seeding failed, continuing..."\n\
 \n\
 # Run Laravel optimizations at container start\n\
 php artisan package:discover --ansi || true\n\

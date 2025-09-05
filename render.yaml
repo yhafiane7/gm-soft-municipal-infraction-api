@@ -6,6 +6,8 @@ services:
     plan: free
     region: oregon
     branch: main
+    healthCheckPath: /api/test
+    autoDeploy: true
     envVars:
       - key: APP_KEY
         generateValue: true
