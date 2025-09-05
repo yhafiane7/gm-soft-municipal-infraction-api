@@ -19,10 +19,10 @@
         "symfony/css-selector": "^6.0",
         "symfony/event-dispatcher": "^6.0",
         "symfony/string": "^6.0",
-        "symfony/yaml": "^6.0"
+        "symfony/yaml": "^6.0",
+        "fakerphp/faker": "^1.9.1"
     },
     "require-dev": {
-        "fakerphp/faker": "^1.9.1",
         "laravel-lang/common": "^2.0",
         "laravel/sail": "^1.0.1",
         "mockery/mockery": "^1.4.4",
