@@ -39,9 +39,7 @@ services:
 
   - type: pserv
     name: infraction-commune-db
-    env: docker
-    image: postgres:15
-    plan: starter
+    plan: free
     region: frankfurt
     envVars:
       - key: POSTGRES_DB
