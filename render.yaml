@@ -1,0 +1,52 @@
+services:
+  - type: web
+    name: infraction-commune-api
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    region: frankfurt
+    branch: main
+    buildCommand: echo "Building with Docker"
+    startCommand: echo "Starting with Docker"
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: infraction-commune-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: infraction-commune-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: infraction-commune-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: infraction-commune-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: infraction-commune-db
+          property: password
+
+  - type: pserv
+    name: infraction-commune-db
+    env: docker
+    image: postgres:15
+    plan: starter
+    region: frankfurt
+    envVars:
+      - key: POSTGRES_DB
+        value: infraction_commune
+      - key: POSTGRES_USER
+        value: postgres
+      - key: POSTGRES_PASSWORD
+        value: password
