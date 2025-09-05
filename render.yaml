@@ -34,7 +34,7 @@ services:
           name: infraction-commune-db
           property: password
 
-  databases:
+databases:
   - name: infraction-commune-db
     engine: POSTGRES
     version: "15"
