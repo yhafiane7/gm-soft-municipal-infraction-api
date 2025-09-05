@@ -36,8 +36,6 @@ services:
 
 databases:
   - name: infraction-commune-db
-    engine: POSTGRES
-    version: "15"
     plan: free
     region: oregon
     databaseName: infraction_commune
