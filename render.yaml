@@ -36,8 +36,6 @@ services:
 
 databases:
   - name: infraction-commune-db
-    engine: POSTGRES
-    version: "15"
     plan: free
     region: frankfurt
     databaseName: infraction_commune
