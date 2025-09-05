@@ -34,14 +34,10 @@ services:
           name: infraction-commune-db
           property: password
 
-  - type: pserv
-    name: infraction-commune-db
+  databases:
+  - name: infraction-commune-db
+    engine: POSTGRES
+    version: "15"
     plan: free
     region: frankfurt
-    envVars:
-      - key: POSTGRES_DB
-        value: infraction_commune
-      - key: POSTGRES_USER
-        value: postgres
-      - key: POSTGRES_PASSWORD
-        value: password
+    databaseName: infraction_commune
