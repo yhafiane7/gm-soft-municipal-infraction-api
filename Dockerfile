@@ -5,12 +5,14 @@ WORKDIR /app
 
 # Copy composer files first for better layer caching
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --prefer-dist --no-interaction --no-progress
+RUN composer install --no-dev --optimize-autoloader --prefer-dist --no-interaction --no-progress --no-scripts
 
 # Copy entire project
 COPY . .
 
+# Run the post-autoload scripts manually after artisan exists
 RUN composer dump-autoload --optimize
+RUN php artisan package:discover
 
 ###### Stage 2: Runtime (Apache + PHP) ######
 FROM php:8.1-apache
@@ -56,7 +58,7 @@ RUN php artisan config:clear \
     && php artisan config:cache \
     && php artisan route:cache \
     && php artisan view:cache
-    
+
 # Permissions for Laravel storage and cache
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
