@@ -24,7 +24,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/test', function (Request $request) {
-    return  'test';
+    return response()->json([
+        'status' => 'success',
+        'message' => 'API is working',
+        'timestamp' => now(),
+        'version' => '1.0.0'
+    ]);
 });
 
 
